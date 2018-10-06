@@ -1,7 +1,9 @@
 #ifndef ENTITY_H
-# define ENTITY_H
+#define ENTITY_H
 
-enum movement {	UP,	DOWN, RIGHT, LEFT };
+#include <string>
+
+enum movement { NONE, UP, DOWN, RIGHT, LEFT };
 
 typedef struct coordonnees {
 	int x;
@@ -16,20 +18,24 @@ private:
 	Entity(Entity const &);
 	Entity & operator=(Entity const &);
 
+protected:
+
 	coord position_;
-	float speed_; // ( 1 / speedFormUser )
 	movement direction_;
-	float lastMoveTime_;
+	float delay_;
+	float paused_;
 
 public:
 
-	Entity(coord position, int speed, movement direction, float currentTime);
+	Entity(coord pos, movement dir, int speed);
 	virtual ~Entity();
 
 	coord getPosition() const;
+	float getDelay() const;
+	int getSpeed() const;
 
 	virtual void collide() = 0;
-	void move(float currentTime, int x, int y);
+	virtual int move(float timeLapse, int x, int y);
 
 };
 
