@@ -34,7 +34,7 @@ void Game::Run()
 	while (42)
 	{
 		std::clock_t current = std::clock();
-		std::clock_t deltaTime = current - _last_clock;
+		float deltaTime = (current - _last_clock) / 100000.00f;
 
 		_fixed_clock += deltaTime;
 		PreRender();
