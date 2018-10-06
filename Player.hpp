@@ -21,6 +21,8 @@ public:
 	std::string getName() const;
 	void setName(std::string name);
 
+	void setDirection(movement dir);
+
 	virtual Missile * shoot(float timeLapse) const;
 	void collide();
 	int move(float timeLapse, int x, int y);
