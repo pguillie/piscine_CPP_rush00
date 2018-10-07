@@ -47,6 +47,7 @@ class Game
 		t_entity *_missiles;
 		t_entity *_enemies;
 		t_entity *_background;
+		int _score;
 		int _height;
 		int _width;
 };
