@@ -14,7 +14,6 @@
 Game::Game(void) :
 	_deltaTime(0),
 	_last_clock(std::clock()),
-	_score(0),
 	_height(LINES),
 	_width(COLS)
 {
@@ -75,7 +74,7 @@ void Game::Run(void)
 
 		_last_clock = current;
 		_deltaTime = deltaTime;
-		usleep(18000);
+		usleep(10000);
 	}
 }
 
@@ -84,8 +83,8 @@ void Game::initBackground()
 	_background = NULL;
 	coord pos;
 	for (int y(1); y < _height - 1; y++) {
-		for (int i(0); i < _width; i++) {
-			if (rand() % 100 < 1) {
+		for (int i(0); i < 10; i++) {
+			if (rand() % 100 > 42) {
 				pos.y = y;
 				pos.x = rand() % (_width - 2) + 1;
 				Missile * star;
@@ -108,14 +107,9 @@ void Game::renderEntity(Entity &e)
 void Game::Render(void)
 {
 	erase();
-	t_entity * e(_background);
-	while (e) {
-		renderEntity(*(e->entity));
-		e = e->next;
-	}
-
 	renderEntity(*_player);
-	e =_enemies;
+	t_entity * e;
+	e = _background;
 	while (e) {
 		renderEntity(*(e->entity));
 		e = e->next;
@@ -125,12 +119,16 @@ void Game::Render(void)
 		renderEntity(*(e->entity));
 		e = e->next;
 	}
+	e =_enemies;
+	while (e) {
+		renderEntity(*(e->entity));
+		e = e->next;
+	}
 }
 
 void Game::PostRender(void)
 {
 	box(stdscr, 0, 0);
-	renderHud();
 	refresh();
 }
 
@@ -275,7 +273,11 @@ t_entity * Game::removeEntity(t_entity *e, t_entity ** type)
 }
 
 bool isACollision(Entity * a, Entity * b) {
-	if (a->getPosition().y == b->getPosition().y) {
+	int yA = a->getPosition().y;
+	int yB = b->getPosition().y;
+	if ((yA == yB)
+		|| (a->getDirection() == UP && yA == yB - 1)
+		|| (a->getDirection() == DOWN && yA == yB + 1)) {
 		int aLeftEnd(a->getPosition().x);
 		int bLeftEnd(b->getPosition().x);
 		int aRightEnd(aLeftEnd + a->getDesign().length());
@@ -290,27 +292,19 @@ bool isACollision(Entity * a, Entity * b) {
 void Game::checkCollisions(void)
 {
 	t_entity * missile(_missiles);
-
-	while (missile)
-	{
+	while (missile) {
 		Entity * a = missile->entity;
 		bool collides(false);
 		t_entity * character(_enemies);
-
-		while (character)
-		{
+		while (character) {
 			Entity * b = character->entity;
-			if (isACollision(a, b))
-			{
+			if (isACollision(a, b)) {
 				collides = true;
 				character = removeEntity(character, &_enemies);
-				_score += 10;
-			}
-			else
+			} else
 				character = character->next;
 		}
-		if (isACollision(a, _player))
-		{
+		if (isACollision(a, _player)) {
 			collides = true;
 			_is_running = false;
 		}
@@ -319,28 +313,20 @@ void Game::checkCollisions(void)
 		else
 			missile = missile->next;
 	}
-
 	t_entity * enemy(_enemies);
-
-	while (enemy)
-	{
+	while (enemy) {
 		Entity * a = enemy->entity;
 		bool collides(false);
 		t_entity * others(_enemies);
-
-		while (others)
-		{
+		while (others) {
 			Entity * b = others->entity;
-			if (a != b && isACollision(a, b))
-			{
+			if (a != b && isACollision(a, b)) {
 				collides = true;
 				others = removeEntity(others, &_enemies);
-			}
-			else
+			} else
 				others = others->next;
 		}
-		if (isACollision(a, _player))
-		{
+		if (isACollision(a, _player)) {
 			collides = true;
 			_is_running = false;
 		}
@@ -350,15 +336,4 @@ void Game::checkCollisions(void)
 			enemy = enemy->next;
 	}
 		
-}
-
-void Game::renderHud(void) const
-{
-	std::stringstream ss;
-
-	move(_height, 1);
-	std::clock_t c = std::clock() / 100000;
-	ss << " TIME " << c << " | " << "SCORE " << _score << " ";
-
-	addstr(ss.str().c_str());
 }
