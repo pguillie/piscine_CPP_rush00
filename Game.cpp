@@ -1,5 +1,4 @@
 #include "Game.hpp"
-#include "Window.hpp"
 #include "Entity.hpp"
 #include "Character.hpp"
 #include "Enemy.hpp"
