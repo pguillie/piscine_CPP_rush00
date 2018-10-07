@@ -1,81 +1,289 @@
 #include "Game.hpp"
-#include <curses.h>
-#include <ctime>
+#include "Window.hpp"
+#include "Entity.hpp"
+#include "Character.hpp"
+#include "Missile.hpp"
+#include "Player.hpp"
+#include "Weapon.hpp"
 #include <iostream>
 #include <sstream>
+#include <curses.h>
+#include <unistd.h>
 
 Game::Game(void) :
 	_deltaTime(0),
-	_last_clock(std::clock() / CLOCKS_PER_SEC),
-	_fixed_clock(0)
+	_last_clock(std::clock()),
+	_height(LINES),
+	_width(COLS)
 {
 	initscr();
 	cbreak();
 	noecho();
 	nonl();
 	intrflush(stdscr, FALSE);
+	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
+	curs_set(FALSE);
+	getmaxyx(stdscr, _height, _width);
+	_height -= 1;
+	_width -= 1;
+	_missiles = NULL;
+	_enemies = NULL;
+//	_background = initBackground();
+	_background = NULL;
+	coord position;
+	position.y = _height - 10;
+	position.x = (_width - 1) / 2 - 2;
+	_player = new Player(position, "/==A==\\");
 }
 
 Game::~Game(void)
 {
 	endwin();
+	t_entity * e(_missiles);
+	t_entity * tmp;
+	while (e) {
+		delete e->entity;
+		tmp = e;
+		e = e->next;
+		delete tmp;
+	}
+	e = _enemies;
+	while (e) {
+		delete e->entity;
+		tmp = e;
+		e = e->next;
+		delete tmp;
+	}
+	delete _player;
 }
 
-bool Game::Continue()
+void Game::Run(void)
 {
-	return _is_running;
-}
+	srand(time(0));
+	_player->setWeapon(new Weapon(500));
 
-void Game::Run()
-{
-	float fps = 1 / 60;
-
-	while (42)
+	_is_running = true;
+	while (_is_running)
 	{
 		std::clock_t current = std::clock();
 		float deltaTime = (current - _last_clock) / 100000.00f;
 
-		_fixed_clock += deltaTime;
-		PreRender();
-			if (_fixed_clock > fps)
-			{
-				_fixed_clock = 0;
-				FixedUpdate();
-			}
-			Update(float(deltaTime));
+		Update(deltaTime);
 		Render();
 		PostRender();
 
 		_last_clock = current;
 		_deltaTime = deltaTime;
+		usleep(18000);
 	}
-	Render();
 }
 
-void Game::PreRender(void)
+void Game::initBackground()
 {
-	clear();
+	//
+}
+
+void Game::renderEntity(Entity &e)
+{
+	move(e.getPosition().y, e.getPosition().x);
+	addstr(e.getDesign().c_str());
 }
 
 void Game::Render(void)
 {
+	clear();
+	renderEntity(*_player);
+	t_entity * e(_missiles);
+	while (e) {
+		renderEntity(*(e->entity));
+		e = e->next;
+	}
+	e =_enemies;
+	while (e) {
+		renderEntity(*(e->entity));
+		e = e->next;
+	}
 }
 
 void Game::PostRender(void)
 {
+	box(stdscr, 0, 0);
 	refresh();
+}
+
+void Game::updatePlayer(float deltaTime) {
+	int ch = getch();
+	switch (ch) {
+	case KEY_UP:
+		_player->setDirection(UP);
+		break;
+	case KEY_DOWN:
+		_player->setDirection(DOWN);
+		break;
+	case KEY_RIGHT:
+		_player->setDirection(RIGHT);
+		break;
+	case KEY_LEFT:
+		_player->setDirection(LEFT);
+		break;
+	case 27:
+		_is_running = false;
+		break;
+	case 113:
+		_is_running = false;
+		break;
+	case 32:
+		Missile * missile = _player->shoot(deltaTime);
+		_missiles = registerEntity(missile, _missiles);
+		break;
+	}
+	_player->move(deltaTime, _height, _width);
 }
 
 void Game::Update(float deltaTime)
 {
-	std::stringstream ss;
-
-	ss << "Update " << deltaTime << std::endl;
-	addstr(ss.str().c_str());
+	updatePlayer(deltaTime);
+	t_entity * e(_missiles);
+	while (e) {
+		if (e->entity->move(deltaTime, _height, _width) < 0)
+			e = removeEntity(e, &_missiles);
+		else
+			e = e->next;
+	}
+	e = _enemies;
+	while (e) {
+		if (e->entity->move(deltaTime, _height, _width) < 0)
+			e = removeEntity(e, &_enemies);
+		else
+			e = e->next;
+	}
+	e = _background;
+	while (e) {
+		if (e->entity->move(deltaTime, _height, _width) < 0)
+			e = removeEntity(e, &_background);
+		else
+			e = e->next;
+	}
+	if (rand() % 1000 > 950) {
+		coord position;
+		position.y = 0;
+		Character * character;
+		if (rand() % 2 == 0) {
+			position.x = rand() % (_width - 2 - 5) + 1;
+			character = new Character(position, DOWN, (rand() % 42 + 100) / 10, "(=0=)");
+		}
+		else {
+			position.x = rand() % (_width - 2 - 3) + 1;
+			character = new Character(position, DOWN, (rand() % 100 + 200) / 10, "<0>");
+		}
+		_enemies = registerEntity(character, _enemies);
+	}
+	checkCollisions();
 }
 
-void Game::FixedUpdate(void)
+void Game::Stop(void)
 {
-	addstr("FixedUpdate\n");
+	_is_running = false;
+}
+
+void Game::registerPlayer(Player *p)
+{
+	_player = p;
+}
+
+t_entity * Game::registerEntity(Entity *e, t_entity *type)
+{
+	if (type) {
+		t_entity * list(type);
+		while (list->next)
+			list = list->next;
+		list->next = new t_entity;
+		list->next->entity = e;
+		list->next->next = NULL;
+		list->next->prev = list;
+	} else {
+		type = new t_entity;
+		type->entity = e;
+		type->next = NULL;
+		type->prev = NULL;
+	}
+	return type;
+}
+
+t_entity * Game::removeEntity(t_entity *e, t_entity ** type)
+{
+	t_entity * next(e->next);
+
+	if (e->prev)
+		e->prev->next = e->next;
+	else
+		*type = e->next;
+	if (e->next)
+		e->next->prev = e->prev;
+	delete e->entity;
+	delete e;
+	return next;
+}
+
+bool isACollision(Entity * a, Entity * b) {
+	if (a->getPosition().y == b->getPosition().y) {
+		int aLeftEnd(a->getPosition().x);
+		int bLeftEnd(b->getPosition().x);
+		int aRightEnd(aLeftEnd + a->getDesign().length());
+		int bRightEnd(bLeftEnd + b->getDesign().length());
+		if ((aLeftEnd >= bLeftEnd && aLeftEnd <= bRightEnd)
+			|| (aRightEnd >= bLeftEnd && aRightEnd <= bRightEnd))
+			return (true);
+	}
+	return (false);
+}
+
+void Game::checkCollisions(void)
+{
+	t_entity * missile(_missiles);
+	while (missile) {
+		Entity * a = missile->entity;
+		bool collides(false);
+		t_entity * character(_enemies);
+		while (character) {
+			Entity * b = character->entity;
+			if (isACollision(a, b)) {
+				collides = true;
+				character = removeEntity(character, &_enemies);
+			} else
+				character = character->next;
+		}
+		if (isACollision(a, _player)) {
+			collides = true;
+			_is_running = false;
+		}
+		if (collides)
+			missile = removeEntity(missile, &_missiles);
+		else
+			missile = missile->next;
+	}
+	t_entity * enemy(_enemies);
+	while (enemy) {
+		Entity * a = enemy->entity;
+		bool collides(false);
+		t_entity * others(_enemies);
+		while (others) {
+			Entity * b = others->entity;
+			if (a != b && isACollision(a, b)) {
+				collides = true;
+				others = removeEntity(others, &_enemies);
+			} else
+				others = others->next;
+		}
+		if (isACollision(a, _player)) {
+			collides = true;
+			_is_running = false;
+		}
+		if (collides)
+			missile = removeEntity(enemy, &_enemies);
+		else
+			enemy = enemy->next;
+	}
+		
 }

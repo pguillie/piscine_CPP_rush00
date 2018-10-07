@@ -15,7 +15,7 @@ private:
 
 public:
 
-	Player(coord position);
+	Player(coord position, std::string design);
 	virtual ~Player();
 
 	std::string getName() const;
@@ -25,7 +25,7 @@ public:
 
 	virtual Missile * shoot(float timeLapse) const;
 	void collide();
-	int move(float timeLapse, int x, int y);
+	int move(float timeLapse, int y, int x);
 
 };
 

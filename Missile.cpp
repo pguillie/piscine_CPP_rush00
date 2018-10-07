@@ -1,7 +1,7 @@
 #include "Missile.hpp"
 
-Missile::Missile(coord position, movement direction, int speed) :
-	Entity(position, direction, speed) {}
+Missile::Missile(coord position, movement direction, int speed, std::string design) :
+	Entity(position, direction, speed, design) {}
 
 Missile::~Missile() { /**/ }
 

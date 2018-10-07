@@ -13,7 +13,7 @@ private:
 
 public:
 
-	Missile(coord pos, movement dir, int speed);
+	Missile(coord pos, movement dir, int speed, std::string design);
 	virtual ~Missile();
 
 	void collide();

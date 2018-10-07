@@ -24,18 +24,20 @@ protected:
 	movement direction_;
 	float delay_;
 	float paused_;
+	std::string design_;
 
 public:
 
-	Entity(coord pos, movement dir, int speed);
+	Entity(coord pos, movement dir, int speed, std::string design);
 	virtual ~Entity();
 
 	coord getPosition() const;
 	float getDelay() const;
 	int getSpeed() const;
+	std::string getDesign() const;
 
 	virtual void collide() = 0;
-	virtual int move(float timeLapse, int x, int y);
+	virtual int move(float timeLapse, int y, int x);
 
 };
 

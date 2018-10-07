@@ -1,21 +1,17 @@
 #include "Weapon.hpp"
 
-Weapon::Weapon(Missile * missile) :
-	delay_(0.1f),
-	paused_(0),
-	missile_(missile)
-{
-	if (delay_ > missile->getDelay())
-		delay_ = missile->getDelay();
-}
-
-Weapon::Weapon(int speed, Missile * missile) :
+Weapon::Weapon(int speed) :
 	delay_(1 / (float)speed),
 	paused_(0),
-	missile_(missile)
+	missileSpeed_(speed)
+{}
+
+Weapon::Weapon(int speed, int missileSpeed) :
+	delay_(1 / (float)speed),
+	paused_(0)
 {
-	if (delay_ > missile->getDelay())
-		delay_ = missile->getDelay();
+	if (speed > missileSpeed)
+		missileSpeed_ = speed;
 }
 
 Weapon::~Weapon() {}
@@ -23,7 +19,7 @@ Weapon::~Weapon() {}
 Missile * Weapon::shoot(float timeLapse, coord position, movement direction) {
 	paused_ -= timeLapse;
 	if (paused_ <= 0) {
-		Missile * m = new Missile(position, direction, missile_->getSpeed());
+		Missile * m = new Missile(position, direction, missileSpeed_, "|");
 		paused_ = delay_;
 		return m;
 	}

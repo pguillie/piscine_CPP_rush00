@@ -18,7 +18,7 @@ protected:
 
 public:
 
-	Character(coord pos, movement dir, int speed);
+	Character(coord pos, movement dir, int speed, std::string design);
 	virtual ~Character();
 
 	void setWeapon(Weapon * w);

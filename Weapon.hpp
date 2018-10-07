@@ -13,12 +13,12 @@ private:
 
 	float delay_;
 	float paused_;
-	Missile * missile_;
+	int missileSpeed_;
 
 public:
 
-	Weapon(Missile * missile);
-	Weapon(int speed, Missile * missile);
+	Weapon(int speed);
+	Weapon(int speed, int missileSpeed);
 	~Weapon();
 
 	Missile * shoot(float timeLapse, coord position, movement direction);
