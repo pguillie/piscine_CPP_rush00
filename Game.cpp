@@ -2,6 +2,7 @@
 #include "Window.hpp"
 #include "Entity.hpp"
 #include "Character.hpp"
+#include "Enemy.hpp"
 #include "Missile.hpp"
 #include "Player.hpp"
 #include "Weapon.hpp"
@@ -61,8 +62,7 @@ Game::~Game(void)
 void Game::Run(void)
 {
 	srand(time(0));
-	_player->setWeapon(new Weapon(500));
-
+	_player->setWeapon(new Weapon(300));
 	_is_running = true;
 	while (_is_running)
 	{
@@ -107,7 +107,7 @@ void Game::renderEntity(Entity &e)
 
 void Game::Render(void)
 {
-	clear();
+	erase();
 	t_entity * e(_background);
 	while (e) {
 		renderEntity(*(e->entity));
@@ -157,7 +157,8 @@ void Game::updatePlayer(float deltaTime) {
 		break;
 	case 32:
 		Missile * missile = _player->shoot(deltaTime);
-		_missiles = registerEntity(missile, _missiles);
+		if (missile)
+			_missiles = registerEntity(missile, _missiles);
 		break;
 	}
 	_player->move(deltaTime, _height, _width);
@@ -168,18 +169,24 @@ void Game::Update(float deltaTime)
 	updatePlayer(deltaTime);
 
 	t_entity * e(_missiles);
-	while (e) {
+	while (e)
+	{
 		if (e->entity->move(deltaTime, _height, _width) < 0)
 			e = removeEntity(e, &_missiles);
 		else
 			e = e->next;
 	}
 	e = _enemies;
-	while (e) {
-		if (e->entity->move(deltaTime, _height, _width) < 0)
+	while (e)
+	{
+		Enemy *en = (Enemy *)e->entity;
+		if (en->move(deltaTime, _height, _width) < 0)
 			e = removeEntity(e, &_enemies);
 		else
 			e = e->next;
+		Missile *m = en->shoot(deltaTime);
+		if (m)
+			_missiles = registerEntity(m, _missiles);
 	}
 	e = _background;
 	while (e) {
@@ -193,14 +200,14 @@ void Game::Update(float deltaTime)
 	if (rand() % 1000 > 950) {
 		coord position;
 		position.y = 0;
-		Character * character;
+		Enemy * character;
 		if (rand() % 2 == 0) {
 			position.x = rand() % (_width - 2 - 5) + 1;
-			character = new Character(position, DOWN, (rand() % 42 + 100) / 10, "(=0=)");
+			character = new Enemy(position, DOWN, (rand() % 42 + 100) / 10, "(=0=)");
 		}
 		else {
 			position.x = rand() % (_width - 2 - 3) + 1;
-			character = new Character(position, DOWN, (rand() % 100 + 200) / 10, "<0>");
+			character = new Enemy(position, DOWN, (rand() % 100 + 200) / 10, "<0>");
 		}
 		_enemies = registerEntity(character, _enemies);
 	}
