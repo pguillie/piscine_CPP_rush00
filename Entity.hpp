@@ -35,6 +35,7 @@ public:
 	float getDelay() const;
 	int getSpeed() const;
 	std::string getDesign() const;
+	movement getDirection() const;
 
 	virtual void collide() = 0;
 	virtual int move(float timeLapse, int y, int x);

@@ -19,6 +19,8 @@ int Entity::getSpeed() const { return 1 / delay_; }
 
 std::string Entity::getDesign() const { return design_; }
 
+movement Entity::getDirection() const { return direction_; }
+
 int Entity::move(float timeLapse, int y, int x) {
 	paused_ -= timeLapse;
 	if (paused_ <= 0) {
