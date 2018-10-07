@@ -107,18 +107,19 @@ void Game::renderEntity(Entity &e)
 void Game::Render(void)
 {
 	clear();
-	renderEntity(*_player);
-	t_entity * e(_missiles);
+	t_entity * e(_background);
 	while (e) {
 		renderEntity(*(e->entity));
 		e = e->next;
 	}
+
+	renderEntity(*_player);
 	e =_enemies;
 	while (e) {
 		renderEntity(*(e->entity));
 		e = e->next;
 	}
-	e = _background;
+	e = _missiles;
 	while (e) {
 		renderEntity(*(e->entity));
 		e = e->next;
