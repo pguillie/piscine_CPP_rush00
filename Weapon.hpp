@@ -2,18 +2,17 @@
 #define WEAPON_H
 
 #include "Missile.hpp"
+#include <ctime>
 
 class Weapon {
 
 private:
-
 	Weapon();
 	Weapon(Weapon const &);
 	Weapon & operator=(Weapon const &);
-
-	float delay_;
-	float paused_;
+	int fireRate_;
 	int missileSpeed_;
+	std::clock_t lastShot_;
 
 public:
 
@@ -21,7 +20,7 @@ public:
 	Weapon(int speed, int missileSpeed);
 	~Weapon();
 
-	Missile * shoot(float timeLapse, coord position, movement direction);
+	Missile *shoot(float timeLapse, coord position, movement direction);
 
 };
 
