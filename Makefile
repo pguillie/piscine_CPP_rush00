@@ -28,7 +28,6 @@ SRC     = main.cpp \
 	    Weapon.cpp \
 	    Window.cpp \
 	    Enemy.cpp
-
 SRCS    = $(addprefix $(SRCDIR), $(SRC))
 OBJS    = $(addprefix $(OBJDIR), $(SRC:.cpp=.o))
 
@@ -44,7 +43,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp
 	$(CC) $(FLAGS) -c -o $@ $< -I $(HEADER)
 
 clean:
-	rm -rf *.o
+	rm -rf $(OBJS)
 
 fclean: clean
 	rm -rf $(NAME)
