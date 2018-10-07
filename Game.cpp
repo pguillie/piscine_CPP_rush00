@@ -90,7 +90,7 @@ void Game::initBackground()
 				if (rand() % 10 < 2)
 					star = new Missile(pos, DOWN, 4, "o");
 				else
-					star = new Missile(pos, DOWN, 4, ".");
+					star = new Missile(pos, DOWN, 2, ".");
 				_background = registerEntity(star, _background);
 			}
 		}
@@ -275,8 +275,8 @@ bool isACollision(Entity * a, Entity * b) {
 	int yA = a->getPosition().y;
 	int yB = b->getPosition().y;
 	if ((yA == yB)
-		|| (a->getDirection() == UP && yA == yB - 1)
-		|| (a->getDirection() == DOWN && yA == yB + 1)) {
+		|| (a->getDirection() == UP && b->getDirection() == DOWN && yA == yB - 1)
+		|| (a->getDirection() == DOWN && b->getDirection() == UP && yA == yB + 1)) {
 		int aLeftEnd(a->getPosition().x);
 		int bLeftEnd(b->getPosition().x);
 		int aRightEnd(aLeftEnd + a->getDesign().length());
