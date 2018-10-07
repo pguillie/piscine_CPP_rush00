@@ -9,6 +9,7 @@ Enemy::Enemy(coord pos, movement dir, int speed, std::string design) :
 	_timeUntilAttack(400)
 {
 	weapon_ = new Weapon(9000 + std::rand() % 5000, 50);
+	weapon_->setColor(RED);
 }
 
 Enemy::~Enemy(void)

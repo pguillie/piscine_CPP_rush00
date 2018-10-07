@@ -8,6 +8,8 @@ Character::Character(coord position, movement direction, int speed, std::string 
 
 Character::~Character() { /**/ }
 
+Weapon * Character::getWeapon(void) const { return weapon_; }
+
 void Character::setWeapon(Weapon * w) { weapon_ = w; }
 
 Missile * Character::shoot(float timeLapse) const {

@@ -7,6 +7,7 @@ Entity::Entity(coord position, movement direction, int speed, std::string design
 {
 	position_.y = position.y;
 	position_.x = position.x;
+	color_ = 0;
 }
 
 Entity::~Entity() {}
@@ -20,6 +21,8 @@ int Entity::getSpeed() const { return 1 / delay_; }
 std::string Entity::getDesign() const { return design_; }
 
 movement Entity::getDirection() const { return direction_; }
+
+int Entity::getColor() const { return color_; }
 
 int Entity::move(float timeLapse, int y, int x) {
 	paused_ -= timeLapse;

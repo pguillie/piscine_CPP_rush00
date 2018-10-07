@@ -15,7 +15,8 @@ public:
 
 	Missile(coord pos, movement dir, int speed, std::string design);
 	virtual ~Missile();
-
+	
+	void setColor(int color);
 	void collide();
 
 };

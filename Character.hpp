@@ -20,7 +20,8 @@ public:
 
 	Character(coord pos, movement dir, int speed, std::string design);
 	virtual ~Character();
-
+	
+	Weapon * getWeapon() const;
 	void setWeapon(Weapon * w);
 
 	virtual Missile * shoot(float timeLapse) const;

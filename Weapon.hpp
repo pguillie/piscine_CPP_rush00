@@ -13,12 +13,15 @@ private:
 	int fireRate_;
 	int missileSpeed_;
 	std::clock_t lastShot_;
+	int color_;
 
 public:
 
 	Weapon(int speed);
 	Weapon(int speed, int missileSpeed);
 	~Weapon();
+
+	void setColor(int color);
 
 	Missile *shoot(float timeLapse, coord position, movement direction);
 

@@ -3,6 +3,9 @@
 
 #include <string>
 
+# define RED 1
+# define GREEN 2
+
 enum movement { NONE, UP, DOWN, RIGHT, LEFT };
 
 typedef struct coordonnees {
@@ -25,6 +28,7 @@ protected:
 	float delay_;
 	float paused_;
 	std::string design_;
+	int color_;
 
 public:
 
@@ -36,6 +40,7 @@ public:
 	int getSpeed() const;
 	std::string getDesign() const;
 	movement getDirection() const;
+	int getColor() const;
 
 	virtual void collide() = 0;
 	virtual int move(float timeLapse, int y, int x);

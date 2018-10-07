@@ -10,6 +10,8 @@
 #include <curses.h>
 #include <unistd.h>
 
+extern int g_sig;
+
 Game::Game(void) :
 	_deltaTime(0),
 	_last_clock(std::clock()),
@@ -25,6 +27,9 @@ Game::Game(void) :
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	curs_set(FALSE);
+	start_color();
+	init_pair(RED, COLOR_RED, COLOR_BLACK);
+	init_pair(GREEN, COLOR_GREEN, COLOR_BLACK);
 	getmaxyx(stdscr, _height, _width);
 	_height -= 1;
 	_width -= 1;
@@ -62,8 +67,9 @@ void Game::Run(void)
 {
 	srand(time(0));
 	_player->setWeapon(new Weapon(300));
+	_player->getWeapon()->setColor(GREEN);
 	_is_running = true;
-	while (_is_running)
+	while (_is_running && g_sig == 0)
 	{
 		std::clock_t current = std::clock();
 		float deltaTime = (current - _last_clock) / 100000.00f;
@@ -76,6 +82,24 @@ void Game::Run(void)
 		_deltaTime = deltaTime;
 		usleep(10000);
 	}
+	move(_height / 2 - 1, (_width - 9) / 2);
+	addstr("GAME OVER");
+	move(_height / 2 + 1, (_width - 21) / 2);
+	addstr("press HomeKey to exit");
+	while ((getch() != KEY_HOME))
+		;
+}
+
+void Game::newStar(coord position) {
+	Missile * star;
+	int type(rand() % 100);
+	if (type < 15)
+		star = new Missile(position, DOWN, 3, "*");
+	else if (type < 42)
+		star = new Missile(position, DOWN, 2, "+");
+	else
+		star = new Missile(position, DOWN, 1, ".");
+	_background = registerEntity(star, _background);
 }
 
 void Game::initBackground()
@@ -83,16 +107,11 @@ void Game::initBackground()
 	_background = NULL;
 	coord pos;
 	for (int y(1); y < _height - 1; y++) {
-		for (int i(0); i < 10; i++) {
-			if (rand() % 100 > 42) {
+		for (int i(0); i < 42; i++) {
+			if (rand() % 1000 < 42) {
 				pos.y = y;
 				pos.x = rand() % (_width - 2) + 1;
-				Missile * star;
-				if (rand() % 10 < 2)
-					star = new Missile(pos, DOWN, 3, "o");
-				else
-					star = new Missile(pos, DOWN, 1, ".");
-				_background = registerEntity(star, _background);
+				newStar(pos);
 			}
 		}
 	}
@@ -101,7 +120,10 @@ void Game::initBackground()
 void Game::renderEntity(Entity &e)
 {
 	move(e.getPosition().y, e.getPosition().x);
+	int color(e.getColor());
+	attron(COLOR_PAIR(color) | A_BOLD);
 	addstr(e.getDesign().c_str());
+	attroff(COLOR_PAIR(color) | A_BOLD);
 }
 
 void Game::Render(void)
@@ -181,13 +203,14 @@ void Game::Update(float deltaTime)
 		Enemy *en = (Enemy *)e->entity;
 		if (en->move(deltaTime, _height, _width) < 0)
 			e = removeEntity(e, &_enemies);
-		else
-		{
+
+	 	else
+ 		{
 			e = e->next;
 			Missile *m = en->shoot(deltaTime);
 			if (m)
 				_missiles = registerEntity(m, _missiles);
-		}
+ 		}
 	}
 	e = _background;
 	while (e) {
@@ -196,7 +219,7 @@ void Game::Update(float deltaTime)
 		else
 			e = e->next;
 	}
-
+	
 	// create enemies
 	if (rand() % 1000 > 950) {
 		coord position;
@@ -208,22 +231,17 @@ void Game::Update(float deltaTime)
 		}
 		else {
 			position.x = rand() % (_width - 2 - 3) + 1;
-			character = new Enemy(position, DOWN, (rand() % 100 + 200) / 10, "<O>");
+			character = new Enemy(position, DOWN, (rand() % 100 + 200) / 10, "<0>");
 		}
 		_enemies = registerEntity(character, _enemies);
 	}
 
 	// create background
-	if (rand() % 500 < 42) {
+	if (rand() % 1000 < 42) {
 		coord position;
 		position.y = 0;
 		position.x = rand() % (_width - 2) + 1;
-		Missile * star;
-		if (rand() % 10 < 2)
-			star = new Missile(position, DOWN, 4, "o");
-		else
-			star = new Missile(position, DOWN, 4, ".");
-		_background = registerEntity(star, _background);
+		newStar(position);
 	}
 
 	checkCollisions();
@@ -333,7 +351,7 @@ void Game::checkCollisions(void)
 			_is_running = false;
 		}
 		if (collides)
-			missile = removeEntity(enemy, &_enemies);
+			enemy = removeEntity(enemy, &_enemies);
 		else
 			enemy = enemy->next;
 	}

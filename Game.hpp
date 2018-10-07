@@ -36,6 +36,7 @@ class Game
 		void PostRender(void);
 		void renderEntity(Entity &e);
 		void renderHud(void) const;
+		void newStar(coord position);
 		void initBackground(void);
 
 	private:

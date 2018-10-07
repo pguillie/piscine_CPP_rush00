@@ -5,4 +5,6 @@ Missile::Missile(coord position, movement direction, int speed, std::string desi
 
 Missile::~Missile() { /**/ }
 
+void Missile::setColor(int color) { color_ = color; }
+
 void Missile::collide() { /**/ }
