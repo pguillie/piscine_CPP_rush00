@@ -43,7 +43,7 @@ int Entity::move(float timeLapse, int y, int x) {
 				return -1;
 			break;
 		case RIGHT:
-			if (position_.x < x - 2)
+			if (position_.x < x - 1 - (int)(getDesign().size()))
 				position_.x += 2;
 			else
 				return -1;
