@@ -11,7 +11,7 @@ class Enemy : public Character
 
 		Enemy &operator=(Enemy const &rhs);
 
-		Missile * shoot(float timeLapse);
+		Missile * shoot(float timeLapse) const;
 
 	private:
 		Enemy(void);

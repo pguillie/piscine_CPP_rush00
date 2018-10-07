@@ -8,7 +8,7 @@ Enemy::Enemy(coord pos, movement dir, int speed, std::string design) :
 	_attackSpeed(400),
 	_timeUntilAttack(400)
 {
-	setWeapon(new Weapon(500));
+	setWeapon(new Weapon(5000 + std::rand() % 5000, 50));
 }
 
 Enemy::~Enemy(void)
@@ -21,7 +21,7 @@ Enemy &Enemy::operator=(Enemy const &rhs)
 	return *this;
 }
 
-Missile * Enemy::shoot(float timeLapse) {
+Missile * Enemy::shoot(float timeLapse) const {
 
 	coord missilePosition;
 	missilePosition.y = position_.y + 2;

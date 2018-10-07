@@ -18,7 +18,7 @@ Weapon::~Weapon() {}
 Missile * Weapon::shoot(float timeLapse, coord position, movement direction) {
 	std::clock_t current = std::clock();
 
-	(void)deltaTime;
+	(void)timeLapse;
 	if (int(current - lastShot_) > fireRate_ * 10)
 	{
 		Missile * m = new Missile(position, direction, missileSpeed_, "|");

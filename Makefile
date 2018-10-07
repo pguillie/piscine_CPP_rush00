@@ -26,7 +26,8 @@ SRC     = main.cpp \
 	    Missile.cpp \
 	    Player.cpp \
 	    Weapon.cpp \
-	    Window.cpp
+	    Window.cpp \
+	    Enemy.cpp
 
 SRCS    = $(addprefix $(SRCDIR), $(SRC))
 OBJS    = $(addprefix $(OBJDIR), $(SRC:.cpp=.o))

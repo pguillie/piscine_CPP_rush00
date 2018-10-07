@@ -183,10 +183,12 @@ void Game::Update(float deltaTime)
 		if (en->move(deltaTime, _height, _width) < 0)
 			e = removeEntity(e, &_enemies);
 		else
+		{
 			e = e->next;
-		Missile *m = en->shoot(deltaTime);
-		if (m)
-			_missiles = registerEntity(m, _missiles);
+			Missile *m = en->shoot(deltaTime);
+			if (m)
+				_missiles = registerEntity(m, _missiles);
+		}
 	}
 	e = _background;
 	while (e) {
@@ -213,7 +215,7 @@ void Game::Update(float deltaTime)
 	}
 
 	// create background
-	if (rand() % 100 < 42) {
+	if (rand() % 500 < 42) {
 		coord position;
 		position.y = 0;
 		position.x = rand() % (_width - 2) + 1;
