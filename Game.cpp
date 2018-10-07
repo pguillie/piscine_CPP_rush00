@@ -29,8 +29,7 @@ Game::Game(void) :
 	_width -= 1;
 	_missiles = NULL;
 	_enemies = NULL;
-//	_background = initBackground();
-	_background = NULL;
+	initBackground();
 	coord position;
 	position.y = _height - 10;
 	position.x = (_width - 1) / 2 - 2;
@@ -81,7 +80,22 @@ void Game::Run(void)
 
 void Game::initBackground()
 {
-	//
+	_background = NULL;
+	coord pos;
+	for (int y(1); y < _height - 1; y++) {
+		for (int i(0); i < _width; i++) {
+			if (rand() % 100 < 1) {
+				pos.y = y;
+				pos.x = rand() % (_width - 2) + 1;
+				Missile * star;
+				if (rand() % 10 < 2)
+					star = new Missile(pos, DOWN, 4, "o");
+				else
+					star = new Missile(pos, DOWN, 4, ".");
+				_background = registerEntity(star, _background);
+			}
+		}
+	}
 }
 
 void Game::renderEntity(Entity &e)
@@ -100,6 +114,11 @@ void Game::Render(void)
 		e = e->next;
 	}
 	e =_enemies;
+	while (e) {
+		renderEntity(*(e->entity));
+		e = e->next;
+	}
+	e = _background;
 	while (e) {
 		renderEntity(*(e->entity));
 		e = e->next;
@@ -144,6 +163,7 @@ void Game::updatePlayer(float deltaTime) {
 void Game::Update(float deltaTime)
 {
 	updatePlayer(deltaTime);
+
 	t_entity * e(_missiles);
 	while (e) {
 		if (e->entity->move(deltaTime, _height, _width) < 0)
@@ -165,6 +185,8 @@ void Game::Update(float deltaTime)
 		else
 			e = e->next;
 	}
+
+	// create enemies
 	if (rand() % 1000 > 950) {
 		coord position;
 		position.y = 0;
@@ -179,6 +201,20 @@ void Game::Update(float deltaTime)
 		}
 		_enemies = registerEntity(character, _enemies);
 	}
+
+	// create background
+	if (rand() % 100 < 42) {
+		coord position;
+		position.y = 0;
+		position.x = rand() % (_width - 2) + 1;
+		Missile * star;
+		if (rand() % 10 < 2)
+			star = new Missile(position, DOWN, 4, "o");
+		else
+			star = new Missile(position, DOWN, 4, ".");
+		_background = registerEntity(star, _background);
+	}
+
 	checkCollisions();
 }
 
