@@ -129,6 +129,7 @@ void Game::Render(void)
 void Game::PostRender(void)
 {
 	box(stdscr, 0, 0);
+	renderHud();
 	refresh();
 }
 
@@ -323,4 +324,14 @@ void Game::checkCollisions(void)
 			enemy = enemy->next;
 	}
 		
+}
+
+void Game::renderHud(void) const
+{
+	std::stringstream ss;
+
+	move(_height, 1);
+	std::clock_t c = std::clock() / 100000;
+	ss << " TIME " << c << " | " << " SCORE " << 0 << " ";
+	addstr(ss.str().c_str());
 }

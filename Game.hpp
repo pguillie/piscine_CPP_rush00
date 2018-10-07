@@ -35,6 +35,7 @@ class Game
 		void Render(void);
 		void PostRender(void);
 		void renderEntity(Entity &e);
+		void renderHud(void) const;
 		void initBackground(void);
 
 	private:
