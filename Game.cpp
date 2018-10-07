@@ -13,6 +13,7 @@
 Game::Game(void) :
 	_deltaTime(0),
 	_last_clock(std::clock()),
+	_score(0),
 	_height(LINES),
 	_width(COLS)
 {
@@ -88,9 +89,9 @@ void Game::initBackground()
 				pos.x = rand() % (_width - 2) + 1;
 				Missile * star;
 				if (rand() % 10 < 2)
-					star = new Missile(pos, DOWN, 4, "o");
+					star = new Missile(pos, DOWN, 3, "o");
 				else
-					star = new Missile(pos, DOWN, 2, ".");
+					star = new Missile(pos, DOWN, 1, ".");
 				_background = registerEntity(star, _background);
 			}
 		}
@@ -128,6 +129,7 @@ void Game::Render(void)
 void Game::PostRender(void)
 {
 	box(stdscr, 0, 0);
+	renderHud();
 	refresh();
 }
 
@@ -202,11 +204,11 @@ void Game::Update(float deltaTime)
 		Enemy * character;
 		if (rand() % 2 == 0) {
 			position.x = rand() % (_width - 2 - 5) + 1;
-			character = new Enemy(position, DOWN, (rand() % 42 + 100) / 10, "(=0=)");
+			character = new Enemy(position, DOWN, (rand() % 42 + 100) / 10, "(-0-)");
 		}
 		else {
 			position.x = rand() % (_width - 2 - 3) + 1;
-			character = new Enemy(position, DOWN, (rand() % 100 + 200) / 10, "<0>");
+			character = new Enemy(position, DOWN, (rand() % 100 + 200) / 10, "<O>");
 		}
 		_enemies = registerEntity(character, _enemies);
 	}
@@ -300,6 +302,7 @@ void Game::checkCollisions(void)
 			if (isACollision(a, b)) {
 				collides = true;
 				character = removeEntity(character, &_enemies);
+				_score += 1;
 			} else
 				character = character->next;
 		}
@@ -335,4 +338,15 @@ void Game::checkCollisions(void)
 			enemy = enemy->next;
 	}
 		
+}
+
+void Game::renderHud(void) const
+{
+	std::stringstream ss;
+
+	move(_height, 1);
+	std::clock_t c = std::clock() / 100000;
+	ss << " TIME " << c << " | " << "SCORE " << _score << " ";
+
+	addstr(ss.str().c_str());
 }
